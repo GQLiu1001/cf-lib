@@ -65,30 +65,32 @@ const handleSizeChange = (event) => {
 
 <template>
   <div class="table-wrap">
-    <table class="table">
-      <thead>
-        <tr>
-          <th v-for="column in columns" :key="column.field" :style="{ width: column.width }">
-            {{ column.label }}
-          </th>
-        </tr>
-      </thead>
-      <tbody>
-        <tr v-if="loading">
-          <td class="table-empty" :colspan="columns.length">加载中...</td>
-        </tr>
-        <tr v-else-if="!rows.length">
-          <td class="table-empty" :colspan="columns.length">暂无数据</td>
-        </tr>
-        <tr v-for="row in rows" :key="getRowKey(row)">
-          <td v-for="column in columns" :key="column.field">
-            <slot :name="`cell-${column.field}`" :row="row">
-              {{ row?.[column.field] ?? '-' }}
-            </slot>
-          </td>
-        </tr>
-      </tbody>
-    </table>
+    <div class="table-scroll">
+      <table class="table">
+        <thead>
+          <tr>
+            <th v-for="column in columns" :key="column.field" :style="{ width: column.width }">
+              {{ column.label }}
+            </th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr v-if="loading">
+            <td class="table-empty" :colspan="columns.length">加载中...</td>
+          </tr>
+          <tr v-else-if="!rows.length">
+            <td class="table-empty" :colspan="columns.length">暂无数据</td>
+          </tr>
+          <tr v-for="row in rows" :key="getRowKey(row)">
+            <td v-for="column in columns" :key="column.field">
+              <slot :name="`cell-${column.field}`" :row="row">
+                {{ row?.[column.field] ?? '-' }}
+              </slot>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
     <div v-if="pagination" class="table-footer">
       <div class="table-meta">共 {{ pagination.total ?? 0 }} 条</div>
       <div class="pager">
@@ -100,7 +102,7 @@ const handleSizeChange = (event) => {
         >
           上一页
         </button>
-        <span>{{ pagination.page }} / {{ totalPages }}</span>
+        <span class="pager-info">第 {{ pagination.page }} / {{ totalPages }} 页</span>
         <button
           class="btn"
           type="button"

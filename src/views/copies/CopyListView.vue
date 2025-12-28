@@ -44,9 +44,25 @@ const editingId = ref(null)
 
 const form = reactive({
   bookId: '',
+  bookTitle: '',
   copyCode: '',
   location: '',
   status: 1,
+})
+
+const bookDropdownOpen = ref(false)
+const bookPagination = reactive({
+  page: 1,
+  size: 6,
+  total: 0,
+})
+const bookRows = ref([])
+const bookLoading = ref(false)
+const bookTotalPages = computed(() => {
+  if (!bookPagination.total) {
+    return 1
+  }
+  return Math.max(1, Math.ceil(bookPagination.total / bookPagination.size))
 })
 
 const columns = computed(() => {
@@ -65,6 +81,23 @@ const columns = computed(() => {
 const loadBooks = async () => {
   const data = await fetchBooks({ page: 1, size: 200 })
   books.value = data.items || []
+}
+
+const loadBookDropdown = async () => {
+  bookLoading.value = true
+  try {
+    const data = await fetchBooks({
+      page: bookPagination.page,
+      size: bookPagination.size,
+      keyword: form.bookTitle,
+    })
+    bookRows.value = data.items || []
+    bookPagination.page = data.page
+    bookPagination.size = data.size
+    bookPagination.total = data.total
+  } finally {
+    bookLoading.value = false
+  }
 }
 
 const loadCopies = async () => {
@@ -105,6 +138,7 @@ const openCreate = () => {
   editingId.value = null
   Object.assign(form, {
     bookId: '',
+    bookTitle: '',
     copyCode: '',
     location: '',
     status: 1,
@@ -116,6 +150,7 @@ const openEdit = (row) => {
   editingId.value = row.id
   Object.assign(form, {
     bookId: row.bookId ?? '',
+    bookTitle: bookMap.value.get(row.bookId) || '',
     copyCode: row.copyCode ?? '',
     location: row.location ?? '',
     status: Number(row.status ?? 1),
@@ -149,6 +184,52 @@ const handleDelete = async (row) => {
   }
   await deleteCopy(row.id)
   await loadCopies()
+}
+
+const openBookDropdown = () => {
+  bookDropdownOpen.value = true
+  bookPagination.page = 1
+  loadBookDropdown()
+}
+
+const handleBookInput = () => {
+  form.bookId = ''
+  if (!bookDropdownOpen.value) {
+    bookDropdownOpen.value = true
+  }
+  bookPagination.page = 1
+  loadBookDropdown()
+}
+
+const handleBookBlur = () => {
+  setTimeout(() => {
+    bookDropdownOpen.value = false
+  }, 150)
+}
+
+const handleBookPageChange = (page) => {
+  bookPagination.page = page
+  loadBookDropdown()
+}
+
+const handleBookPrev = () => {
+  if (bookPagination.page <= 1) {
+    return
+  }
+  handleBookPageChange(bookPagination.page - 1)
+}
+
+const handleBookNext = () => {
+  if (bookPagination.page >= bookTotalPages.value) {
+    return
+  }
+  handleBookPageChange(bookPagination.page + 1)
+}
+
+const selectBook = (row) => {
+  form.bookId = row.id
+  form.bookTitle = row.title
+  bookDropdownOpen.value = false
 }
 
 onMounted(async () => {
@@ -219,12 +300,52 @@ onMounted(async () => {
     <div class="form-grid">
       <label class="form-row">
         <span>书目</span>
-        <select v-model="form.bookId">
-          <option value="">请选择书目</option>
-          <option v-for="item in books" :key="item.id" :value="item.id">
-            {{ item.title }}
-          </option>
-        </select>
+        <div class="dropdown-wrapper">
+          <div class="input-inline">
+            <input
+              v-model="form.bookTitle"
+              placeholder="输入书名/作者/ISBN"
+              @focus="openBookDropdown"
+              @input="handleBookInput"
+              @blur="handleBookBlur"
+            />
+          </div>
+          <div v-if="bookDropdownOpen" class="dropdown-panel dropdown-panel-absolute">
+            <div v-if="bookLoading" class="dropdown-empty">加载中...</div>
+            <div v-else-if="!bookRows.length" class="dropdown-empty">暂无匹配书目</div>
+            <div v-else class="dropdown-list">
+              <button
+                v-for="item in bookRows"
+                :key="item.id"
+                class="dropdown-item"
+                type="button"
+                @mousedown.prevent="selectBook(item)"
+              >
+                <div class="dropdown-title">{{ item.title }}</div>
+                <div class="dropdown-meta">{{ item.author }} · {{ item.isbn }}</div>
+              </button>
+            </div>
+            <div class="dropdown-footer">
+              <button
+                class="btn"
+                type="button"
+                :disabled="bookPagination.page <= 1"
+                @click="handleBookPrev"
+              >
+                上一页
+              </button>
+              <span class="dropdown-page">第 {{ bookPagination.page }} / {{ bookTotalPages }} 页</span>
+              <button
+                class="btn"
+                type="button"
+                :disabled="bookPagination.page >= bookTotalPages"
+                @click="handleBookNext"
+              >
+                下一页
+              </button>
+            </div>
+          </div>
+        </div>
       </label>
       <label class="form-row">
         <span>副本编号</span>

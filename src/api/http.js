@@ -1,7 +1,9 @@
 import { clearAuth, getToken } from '../auth/storage.js'
+import { mockRequest } from './mock.js'
 import { notifyError } from '../utils/notify.js'
 
 const API_BASE = 'http://localhost:8080'
+const USE_MOCK = true
 const DEFAULT_HEADERS = {
   Accept: 'application/json',
   'Content-Type': 'application/json',
@@ -43,6 +45,16 @@ function handleAuthError(status, message) {
 }
 
 export async function request(path, options = {}) {
+  if (USE_MOCK) {
+    try {
+      return await mockRequest(path, options)
+    } catch (error) {
+      handleAuthError(error.status, error.message)
+      notifyError(error.message || '请求失败')
+      throw error
+    }
+  }
+
   const {
     method = 'GET',
     params,
