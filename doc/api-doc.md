@@ -48,7 +48,7 @@ POST /api/v1/auth/login
   "code": 200,
   "message": "OK",
   "data": {
-    "accessToken": "token_xxx",
+    "accessToken": "asdiasdasdhsad...",
     "user": {
       "id": "1",
       "username": "admin",
