@@ -19,26 +19,20 @@ SET sql_mode = 'STRICT_TRANS_TABLES,NO_ENGINE_SUBSTITUTION';
 -- =========================
 
 CREATE TABLE sys_user (
-  id            BIGINT PRIMARY KEY COMMENT '用户ID（雪花/自增均可）',
-  username      VARCHAR(64) NOT NULL COMMENT '用户名（唯一）',
-  password_hash VARCHAR(255) NOT NULL COMMENT '密码哈希（bcrypt/argon2）',
-  nickname      VARCHAR(64)  DEFAULT NULL COMMENT '昵称',
-  phone         VARCHAR(32)  DEFAULT NULL COMMENT '手机号',
-  email         VARCHAR(128) DEFAULT NULL COMMENT '邮箱',
-  status        TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用 0禁用',
-  last_login_at DATETIME DEFAULT NULL COMMENT '最近登录时间',
+  id        BIGINT PRIMARY KEY COMMENT '用户ID（雪花/自增均可）',
+  username  VARCHAR(64) NOT NULL COMMENT '用户名（唯一）',
+  password  VARCHAR(128) NOT NULL COMMENT '密码（明文，仅演示用）',
+  nickname  VARCHAR(64)  DEFAULT NULL COMMENT '昵称',
+  phone     VARCHAR(32)  DEFAULT NULL COMMENT '手机号',
+  email     VARCHAR(128) DEFAULT NULL COMMENT '邮箱',
+  status    TINYINT NOT NULL DEFAULT 1 COMMENT '状态：1启用 0禁用',
 
-  created_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
-  updated_at    DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
-  created_by    BIGINT DEFAULT NULL COMMENT '创建人用户ID',
-  updated_by    BIGINT DEFAULT NULL COMMENT '更新人用户ID',
-  deleted_at    DATETIME DEFAULT NULL COMMENT '删除时间（软删除标记）',
-  version       INT NOT NULL DEFAULT 0 COMMENT '乐观锁版本号',
+  created_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT '创建时间',
+  updated_at DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP COMMENT '更新时间',
 
   UNIQUE KEY uk_user_username (username),
-  KEY idx_user_status (status),
-  KEY idx_user_deleted (deleted_at)
-) ENGINE=InnoDB COMMENT='系统用户表';
+  KEY idx_user_status (status)
+) ENGINE=InnoDB COMMENT='系统用户表（演示版）';
 
 CREATE TABLE sys_role (
   id          BIGINT PRIMARY KEY COMMENT '角色ID',
@@ -179,65 +173,15 @@ INSERT INTO sys_role(id, role_code, role_name, status) VALUES
 (3, 'READER', '读者', 1);
 
 
-INSERT INTO sys_user(id, username, password_hash, nickname, phone, email, status, last_login_at) VALUES
-(1, 'admin', '$2b$10$mockhashmockhashmockhash001xxxxxxxxxxxxxxxxxxxx', '管理员', '13800000001', 'admin@example.com', 1, '2025-12-27 10:00:00'),
-(2, 'librarian1', '$2b$10$mockhashmockhashmockhash002xxxxxxxxxxxxxxxxxxxx', '馆员1', '13800000002', 'librarian1@example.com', 1, '2025-12-08 10:00:00'),
-(3, 'librarian2', '$2b$10$mockhashmockhashmockhash003xxxxxxxxxxxxxxxxxxxx', '馆员2', '13800000003', 'librarian2@example.com', 1, '2025-12-25 10:00:00'),
-(4, 'librarian3', '$2b$10$mockhashmockhashmockhash004xxxxxxxxxxxxxxxxxxxx', '馆员3', '13800000004', 'librarian3@example.com', 1, '2025-12-28 10:00:00'),
-(5, 'reader01', '$2b$10$mockhashmockhashmockhash005xxxxxxxxxxxxxxxxxxxx', '读者01', '13900000001', 'reader01@example.com', 1, NULL),
-(6, 'reader02', '$2b$10$mockhashmockhashmockhash006xxxxxxxxxxxxxxxxxxxx', '读者02', '13900000002', 'reader02@example.com', 1, NULL),
-(7, 'reader03', '$2b$10$mockhashmockhashmockhash007xxxxxxxxxxxxxxxxxxxx', '读者03', '13900000003', 'reader03@example.com', 1, NULL),
-(8, 'reader04', '$2b$10$mockhashmockhashmockhash008xxxxxxxxxxxxxxxxxxxx', '读者04', '13900000004', 'reader04@example.com', 1, NULL),
-(9, 'reader05', '$2b$10$mockhashmockhashmockhash009xxxxxxxxxxxxxxxxxxxx', '读者05', '13900000005', 'reader05@example.com', 1, NULL),
-(10, 'reader06', '$2b$10$mockhashmockhashmockhash010xxxxxxxxxxxxxxxxxxxx', '读者06', '13900000006', 'reader06@example.com', 1, NULL),
-(11, 'reader07', '$2b$10$mockhashmockhashmockhash011xxxxxxxxxxxxxxxxxxxx', '读者07', '13900000007', 'reader07@example.com', 1, NULL),
-(12, 'reader08', '$2b$10$mockhashmockhashmockhash012xxxxxxxxxxxxxxxxxxxx', '读者08', '13900000008', 'reader08@example.com', 1, NULL),
-(13, 'reader09', '$2b$10$mockhashmockhashmockhash013xxxxxxxxxxxxxxxxxxxx', '读者09', '13900000009', 'reader09@example.com', 1, NULL),
-(14, 'reader10', '$2b$10$mockhashmockhashmockhash014xxxxxxxxxxxxxxxxxxxx', '读者10', '13900000010', 'reader10@example.com', 1, NULL),
-(15, 'reader11', '$2b$10$mockhashmockhashmockhash015xxxxxxxxxxxxxxxxxxxx', '读者11', '13900000011', 'reader11@example.com', 1, NULL),
-(16, 'reader12', '$2b$10$mockhashmockhashmockhash016xxxxxxxxxxxxxxxxxxxx', '读者12', '13900000012', 'reader12@example.com', 0, NULL),
-(17, 'reader13', '$2b$10$mockhashmockhashmockhash017xxxxxxxxxxxxxxxxxxxx', '读者13', '13900000013', 'reader13@example.com', 1, NULL),
-(18, 'reader14', '$2b$10$mockhashmockhashmockhash018xxxxxxxxxxxxxxxxxxxx', '读者14', '13900000014', 'reader14@example.com', 1, NULL),
-(19, 'reader15', '$2b$10$mockhashmockhashmockhash019xxxxxxxxxxxxxxxxxxxx', '读者15', '13900000015', 'reader15@example.com', 1, NULL),
-(20, 'reader16', '$2b$10$mockhashmockhashmockhash020xxxxxxxxxxxxxxxxxxxx', '读者16', '13900000016', 'reader16@example.com', 1, NULL),
-(21, 'reader17', '$2b$10$mockhashmockhashmockhash021xxxxxxxxxxxxxxxxxxxx', '读者17', '13900000017', 'reader17@example.com', 1, NULL),
-(22, 'reader18', '$2b$10$mockhashmockhashmockhash022xxxxxxxxxxxxxxxxxxxx', '读者18', '13900000018', 'reader18@example.com', 1, NULL),
-(23, 'reader19', '$2b$10$mockhashmockhashmockhash023xxxxxxxxxxxxxxxxxxxx', '读者19', '13900000019', 'reader19@example.com', 1, NULL),
-(24, 'reader20', '$2b$10$mockhashmockhashmockhash024xxxxxxxxxxxxxxxxxxxx', '读者20', '13900000020', 'reader20@example.com', 1, NULL),
-(25, 'reader21', '$2b$10$mockhashmockhashmockhash025xxxxxxxxxxxxxxxxxxxx', '读者21', '13900000021', 'reader21@example.com', 1, NULL),
-(26, 'reader22', '$2b$10$mockhashmockhashmockhash026xxxxxxxxxxxxxxxxxxxx', '读者22', '13900000022', 'reader22@example.com', 1, NULL),
-(27, 'reader23', '$2b$10$mockhashmockhashmockhash027xxxxxxxxxxxxxxxxxxxx', '读者23', '13900000023', 'reader23@example.com', 1, NULL),
-(28, 'reader24', '$2b$10$mockhashmockhashmockhash028xxxxxxxxxxxxxxxxxxxx', '读者24', '13900000024', 'reader24@example.com', 0, NULL);
+INSERT INTO sys_user(id, username, password, nickname, phone, email, status) VALUES
+(1, 'admin',     'admin',     '管理员',   '13800000001', 'admin@example.com',     1),
+(2, 'librarian', 'librarian', '馆员',     '13800000002', 'librarian@example.com', 1),
+(3, 'reader',    'reader',    '读者',     '13900000001', 'reader@example.com',    1);
 
 INSERT INTO sys_user_role(user_id, role_id) VALUES
-(1,1),
-(2,2),
-(3,2),
-(4,2),
-(5,3),
-(6,3),
-(7,3),
-(8,3),
-(9,3),
-(10,3),
-(11,3),
-(12,3),
-(13,3),
-(14,3),
-(15,3),
-(16,3),
-(17,3),
-(18,3),
-(19,3),
-(20,3),
-(21,3),
-(22,3),
-(23,3),
-(24,3),
-(25,3),
-(26,3),
-(27,3),
-(28,3);
+(1, 1),
+(2, 2),
+(3, 3);
 
 INSERT INTO lib_category(id, parent_id, name, code) VALUES
 (1,0,'文学','LIT'),
